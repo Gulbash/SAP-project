@@ -1,0 +1,12 @@
+---
+title: "Procjena kreditnog rizika"
+output: pdf_document
+---
+
+
+```{r}
+raw_data = read.csv('procjena_kreditnog_rizika.csv')
+summary(raw_data)
+```
+
+
