@@ -3,10 +3,25 @@ title: "Procjena kreditnog rizika"
 output: pdf_document
 ---
 
+```{r setup, include=FALSE}
+library(tidyverse)
+library(dplyr)
+```
+
 
 ```{r}
 raw_data = read.csv('procjena_kreditnog_rizika.csv')
 summary(raw_data)
+
+head(raw_data)
 ```
 
+### Možemo li temeljem drugih dostupnih varijabli predvidjeti hoće li nastupiti default za odredenog klijenta? Koje varijable povećavaju tu vjerojatnost?
 
+### Jesu li muškarci skloniji neispunjavanju obveza po kreditu od žena?
+
+### Postoje li razlike u traženom iznosu kredita prema imovini klijenta?
+
+### Naše pitanje 1
+
+### Naše pitanje 2
