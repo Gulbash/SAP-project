@@ -1,0 +1,22 @@
+Ime varijable,Opis
+AccountStatus,Stanje tekućeg računa – iznos podijeljen u kategorije (ili račun ne postoji)
+Duration,Period otplate
+CreditHistory,Podatci o kreditnoj povijesti klijenta
+Purpose,Svrha podizanja kredita
+CreditAmount,Iznos kredita
+Account,Stanje štednog računa
+EmploymentSince,Informacije o trajanju zaposlenja klijenta
+PercentOfIncome,Iznos rate kao postotak raspoloživog dohotka
+PersonalStatus,Spol i bračno stanje klijenta
+OtherDebtors,Informacije o sudužnicima
+ResidenceSince,Koliko dugo klijent stanuje na postojećoj adresi
+Property,Najvrednija imovina koju klijent posjeduje
+Age,Dob klijenta
+OtherInstallPlans,Vrsta drugih istovremeno otvorenih kredita
+Housing,Stambeni status
+NumExistingCredits,Broj postojećih kredita
+Job,Vrsta radnog mjesta klijenta
+NumberOfDependents,Broj osoba u kućanstvu
+Telephone,Posjeduje li klijent vlastiti telefon
+ForeignWorker,Je li klijent strani radnik
+Default,Default flag (1 označava kašnjenje po kreditnim obvezama)
