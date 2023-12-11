@@ -8,12 +8,128 @@ library(tidyverse)
 library(dplyr)
 ```
 
+Loading and taking a quick look at the data.
 
 ```{r}
-raw_data = read.csv('procjena_kreditnog_rizika.csv')
-summary(raw_data)
+data = read.csv('procjena_kreditnog_rizika.csv')
+summary(data)
+head(data)
+```
 
-head(raw_data)
+Tidying up the data and making it more readable.
+
+```{r}
+data$Default <- as.logical(data$Default)
+data$ResidenceSince <-
+  ifelse(data$ResidenceSince == ".. >= 7 years",
+         "... >= 7 years",
+         data$ResidenceSince)
+data$NumExistingCredits <-
+  gsub("above", "... >=", data$NumExistingCredits)
+data$NumExistingCredits <- gsub("or", "||", data$NumExistingCredits)
+data$NumberOfDependents <-
+  gsub("less than", "... <", data$NumberOfDependents)
+data$NumberOfDependents <-
+  gsub("3 or more", "... >= 3", data$NumberOfDependents)
+```
+
+Ordering variables and converting the data type to a factor
+
+```{r}
+# should this column be ordered and does "no checking account" make this unfeasible?
+data$AccountStatus <-
+  factor(
+    data$AccountStatus,
+    levels = c("no checking account",
+               "... < 0",
+               "0 <= ... < 200",
+               "... >= 200")
+  )
+# should this column be ordered and does the ordering make sense?
+data$CreditHistory <-
+  factor(
+    data$CreditHistory,
+    levels = c(
+      "critical account/ other credits existing (not at this bank)",
+      "delay in paying off in the past",
+      "existing credits paid back duly till now",
+      "all credits at this bank paid back duly",
+      "no credits taken/ all credits paid back duly"
+    )
+  )
+data$Purpose <- factor(data$Purpose)
+# should this column be ordered and does "unknown/ no savings account" make this unfeasible?
+data$Account <-
+  factor(
+    data$Account,
+    levels = c(
+      "unknown/ no savings account",
+      "... < 100",
+      "100 <= ... < 500",
+      "500 <= ... < 1000",
+      "... >= 1000"
+    )
+  )
+# should this column be ordered and does "unemployed" make this unfeasible?
+data$EmploymentSince <-
+  factor(
+    data$EmploymentSince,
+    levels = c(
+      "unemployed",
+      "... < 1 year",
+      "1 <= ... < 4 years",
+      "4 <= ... < 7 years",
+      "... >= 7 years"
+    )
+  )
+data$PercentOfIncome <-
+  factor(
+    data$PercentOfIncome,
+    levels = c("... < 20%",
+               "20% <= ... < 25%",
+               "25% <= ... < 35%",
+               "... >= 35%")
+  )
+data$PersonalStatus <- factor(data$PersonalStatus)
+data$OtherDebtors <- factor(data$OtherDebtors)
+data$ResidenceSince <-
+  factor(
+    data$ResidenceSince,
+    levels = c("... < 1 year",
+               "1 <= ... < 4 years",
+               "4 <= ... < 7 years",
+               "... >= 7 years")
+  )
+data$Property <- factor(data$Property)
+data$OtherInstallPlans <- factor(data$OtherInstallPlans)
+data$Housing <- factor(data$Housing)
+data$NumExistingCredits <-
+  factor(data$NumExistingCredits,
+         levels = c("1",
+                    "2 || 3",
+                    "4 || 5",
+                    "... >= 6"))
+# should this column be ordered?
+data$Job <-
+  factor(
+    data$Job,
+    levels = c(
+      "unemployed/ unskilled - non-resident",
+      "unskilled - resident",
+      "skilled employee / official",
+      "management/ self-employed/highly qualified employee/ officer"
+    )
+  )
+data$NumberOfDependents <-
+  factor(data$NumberOfDependents, levels = c("... < 3",
+                                             "... >= 3"))
+data$Telephone <- factor(data$Telephone)
+data$ForeignWorker <- factor(data$ForeignWorker)
+data$Default <- factor(data$Default)
+```
+
+```{r}
+head(data)
 ```
 
 ### Možemo li temeljem drugih dostupnih varijabli predvidjeti hoće li nastupiti default za odredenog klijenta? Koje varijable povećavaju tu vjerojatnost?
