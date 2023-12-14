@@ -90,7 +90,14 @@ data$PercentOfIncome <-
                "25% <= ... < 35%",
                "... >= 35%")
   )
-data$PersonalStatus <- factor(data$PersonalStatus)
+# Dividing PersonalStatus column to Sex and MaritalStatus
+split_parts <- strsplit(as.character(data$PersonalStatus), " - ")
+data$Gender <- sapply(split_parts, function(x) x[1])
+data$MaritalStatus <- sapply(split_parts, function(x) x[2])
+data <- data[, !(names(data) %in% c("PersonalStatus"))]
+data <- data %>% select(Gender, MaritalStatus, everything())
+data$Gender <- factor(data$Gender)
+data$MaritalStatus <- factor(data$MaritalStatus)
 data$OtherDebtors <- factor(data$OtherDebtors)
 data$ResidenceSince <-
   factor(
@@ -129,7 +136,133 @@ data$Default <- factor(data$Default)
 ```
 
 ```{r}
+attach(data)
 head(data)
+```
+
+We are calculating and plotting the correlation matrix. We want to see how individual variables are specifically correlated with the variable 'Default', so we will separately draw that graph. The idea is to find and better examine the variables that have a greater impact on the final outcome of the 'Default' variable.
+
+```{r}
+library(corrplot)
+
+corr_matrix <- cor(data.frame(lapply(data, function(x) as.numeric(x))))
+corrplot(corr_matrix, method = "color", type = "upper", tl.col = "black", tl.srt = 90)
+
+cor_with_target <- corr_matrix["Default", ]
+barplot(cor_with_target, names.arg = names(cor_with_target),
+         las = 2, 
+         cex.names = 0.8,
+         col = ifelse(cor_with_target > 0, "blue", "red"),
+         main = paste("Correlations with Default variable"),
+         ylab = "Correlation")
+
+filt_cor_with_target <- cor_with_target[abs(cor_with_target) >= 0.1 & cor_with_target != 1]
+print(names(filt_cor_with_target))
+```
+
+There are 5 variables that has an absolute correlation greater or equal to 0.1. Those variables may have greater predictive power than the other ones that are poorly correlated with variable 'Default'. Let's explore them further. We'll start with 'AccountStatus' which tells us a current state of person's account if they even have one.
+
+```{r}
+barplot(table(Default, AccountStatus), main = "Number of defaults based on account status", 
+        border="white", col = c('blue', 'red'), xlab="Account Status", ylim = c(0, 400))
+abline(h = seq(0, 500, by = 50), col = "gray", lty = 2)
+legend("topright", legend = levels(Default), fill = c('blue', 'red'), title = "Default")
+```
+
+What we see here is that the correlation result is heavily influenced by 'no checking account' value which doesn't tell us much. If we drop that value (which we can't do because we would lose almost 40% of our data) we would see negative correlation. That would be more in line with our expectation that the more money someone has in their account, the lower the chance of default is. We continue with variable 'Duration', which is numeric variable and could give us more information.
+
+```{r}
+hist(Duration, col = 'lightgreen', ylim = c(0, 300), main = 'Histogram of duration')
+
+boxplot(Duration, col = 'lightgreen', main = 'Boxplot of duration')
+abline(h = seq(0, 70, by = 12), col = "gray", lty = 2)
+
+defaulted <- data[Default == 'TRUE', ]
+not_defaulted <- data[Default == 'FALSE', ]
+
+hist(defaulted$Duration, breaks=10, xlim=c(0,75), ylim = c(0,250), col=rgb(1,0,0,0.5),
+     xlab="Duration", ylab="Frequency", main="Distribution of Duration based on Default" )
+hist(not_defaulted$Duration, breaks=10, xlim=c(0,75), ylim = c(0,250), col=rgb(0,0,1,0.5), add=T)
+legend("topright", legend = levels(Default), fill = c(rgb(0,0,1,0.5), rgb(1,0,0,0.5)), title = "Default")
+
+hist(defaulted$Duration, breaks=10, xlim=c(0,75), ylim = c(0,0.1), freq = FALSE, col=rgb(1,0,0,0.5), xlab="Duration", 
+     ylab="Relative frequency", main="Distribution of Duration")
+hist(not_defaulted$Duration, breaks=10, freq = FALSE, xlim=c(0,75), col=rgb(0,0,1,0.5), add=T)
+legend("topright", legend = levels(Default), fill = c(rgb(0,0,1,0.5), rgb(1,0,0,0.5)), title = "Default")
+
+```
+
+Seeing the distribution of variable 'Duration', we can conclude that most of the credits are short-term. We also suspect that there are some outliers in the data, credits with duration of 50 or more months. Boxplot gives us a confirmation and also tells us that at least 50% of data is between 12 and 24. The next thing that interest to us is which of those credits ended up being paid off. The positive correlation suggests that the longer the duration of a credit is, greater the chance of default. That is also what we see in separated histograms for defaulted and non defaulted credits. Duration of a credit won't give us the full perspective. To compliment that variable, we'll use 'CreditAmount'.
+
+```{r}
+hist(CreditAmount, col = 'lightgreen', ylim = c(0, 500), main = 'Histogram of duration')
+
+boxplot(CreditAmount, col = 'lightgreen', main = 'Boxplot of duration')
+abline(h = seq(0, 20000, by = 2000), col = "gray", lty = 2)
+```
+
+Both of these variables are not giving us the full information. The credit can have long duration and small amount and vice versa. Let's try to combine the two variables and see what does it give us.
+
+```{r}
+plot(CreditAmount, Duration,
+     pch=16, 
+     cex=1, 
+     col=Default,
+     xlab="Credit amount", ylab="Duration",
+     main="Credit amount and duration relation"
+)
+legend("topright", legend = c("Not Default", "Default"), col = Default, pch = 16)
+
+MonthlyPayment = CreditAmount / Duration
+
+plot(MonthlyPayment,
+     pch=16, 
+     cex=1, 
+     col=Default,
+     ylab="Monthly Payment",
+)
+legend("topright", legend = c("Not Default", "Default"), col = Default, pch = 16)
+```
+
+We can see that most of the small credits with short duration are getting paid off. On the other hand, longer term credits with bigger amounts are defaulted more often. The size of monthly payment doesn't seem to have significant impact on our target variable. To conclude our list of correlated variables, let's check the final two, 'CreditHistory' and 'EmploymentSince'.
+
+```{r}
+barplot(table(Default, as.numeric(CreditHistory)), main = "Number of defaults based on Credit history", 
+        border="white", col = c('blue', 'red'), xlab="Credit History", ylab = 'Frequency', ylim = c(0, 600))
+abline(h = seq(0, 600, by = 50), col = "gray", lty = 2)
+legend("topright", legend = levels(Default), fill = c('blue', 'red'), title = "Default")
+
+# printing values for x axis
+cat("1 - critical account/ other credits existing (not at this bank) \
+2 - delay in paying off in the past \
+3 - existing credits paid back duly till now \
+4 - all credits at this bank paid back duly \
+5 - no credits taken/ all credits paid back duly")
+
+barplot(table(Default, EmploymentSince), main = "Number of defaults based on years employed", 
+        border="white", col = c('blue', 'red'), xlab="Employment since", ylab = 'Frequency', ylim = c(0, 400))
+abline(h = seq(0, 400, by = 50), col = "gray", lty = 2)
+legend("topright", legend = levels(Default), fill = c('blue', 'red'), title = "Default")
+
+```
+
+Contrary to what the logic would suggest, it seems that good credit history does not suggest the credit would be paid back. We'll now explore how does gender affect person's ability to pay back the loan.
+
+```{r}
+male <- data[Gender == 'male', ]
+female <- data[Gender == 'female', ]
+
+print("Percentage of defaulted men:")
+print(as.numeric(1-table(male$Default)/count(male)))
+print("Percentage of defaulted women:")
+print(as.numeric(1-table(female$Default)/count(female)))
+```
+
+We can see that only about 27% of men in our dataset defaulted, in comparison to around 35% women. Our statistical tests will tell if that difference is significant.
+
+```{r}
+boxplot(CreditAmount~PercentOfIncome, col = 'lightgreen', ylab = "Credit amount", xlab = "Percent of income")
+abline(h = seq(0, 20000, by = 2000), col = "gray", lty = 2)
 ```
 
 ### Možemo li temeljem drugih dostupnih varijabli predvidjeti hoće li nastupiti default za odredenog klijenta? Koje varijable povećavaju tu vjerojatnost?
