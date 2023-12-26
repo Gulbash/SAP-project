@@ -265,12 +265,65 @@ boxplot(CreditAmount~PercentOfIncome, col = 'lightgreen', ylab = "Credit amount"
 abline(h = seq(0, 20000, by = 2000), col = "gray", lty = 2)
 ```
 
-### Možemo li temeljem drugih dostupnih varijabli predvidjeti hoće li nastupiti default za odredenog klijenta? Koje varijable povećavaju tu vjerojatnost?
+Na temelju proučavanja podataka ima smisla testirati hipotezu da su žene sklonije neispunjavanju kreditnih obaveza od muškaraca. Kako bismo to testirali koristimo test proporcija. Kao nultu hipotezu pretpostavljamo jednakost proporcija dok za alternativnu hipotezu stavimo da je manji udio muškaraca nego žena koji ne ispunjavaju kreditne obaveze.
 
-### Jesu li muškarci skloniji neispunjavanju obveza po kreditu od žena?
+```{r}
+male_default_count = sum(male$Default==TRUE)
+female_default_count = sum(female$Default==TRUE)
+x = c(male_default_count, female_default_count)
+n = c(count(male)$n, count(female)$n)
 
-### Postoje li razlike u traženom iznosu kredita prema imovini klijenta?
+prop.test(x, n, alternative = "less")
+```
+Na razini značajnosti od 5% možemo zaključiti da su žene sklonije neispunjavanju kreditnih obaveza od muškaraca na temelju ovih podataka.
 
-### Naše pitanje 1
+Testirajmo sada postoji li razlika u traženom iznosu kredita prema imovini klijenta. Da bismo to testirali treba nam ANOVA test. On ima određene pretpostavke koje se moramo uvjeriti da su zadovoljene prije nego krenemo na testiranje. Prva je pretpostavka pojedinih podataka u uzorcima, druge je pretpostavka normalne razdiobe podataka, a treća je pretpostavka homogenosti varijanci među populacijama. Pogledajmo prvo kako izgledaju histogrami da vidimo ima li pretpostavka o normalnosti smisla. Naše populacije se razlikuju s obzirom na imovinu koju osoba posjeduje, a proučavamo iznos kredita.
 
-### Naše pitanje 2
+```{r}
+for (item in unique(data$Property)) {
+  hist(data$CreditAmount[data$Property==item], main = paste("Histogram of credit amount with property" , item), xlab = 'Credit amount')
+}
+```
+Vidimo kako pretpostavka o normalnosti nema smisla no probajmo sada logaritmirati podatke pa onda provesti Lillieforsovu inačicu KS testa.
+
+```{r}
+require(nortest)
+
+data$LogCreditAmount<-log(data$CreditAmount)
+
+for (item in unique(data$Property)) {
+  print(lillie.test(data$LogCreditAmount[data$Property==item]))
+  hist(data$LogCreditAmount[data$Property==item], main = paste("Histogram of log credit amount with property" , item), xlab = 'Log credit amount')
+}
+```
+Bartlettovim testom testiramo homogenost varijanci kod razlicitih populacija. Postavljamo ipoteze:
+$$ \begin{aligned}
+  H_0 & : \sigma_1^2 = \sigma_2^2 = \ldots = \sigma_k^2 \\
+  H_1 & : \text{barem dvije varijance nisu iste}.
+\end{aligned} $$
+```{r}
+bartlett.test(data$LogCreditAmount ~ data$Property)
+```
+Vidimo da su pretpostavke o normalnosti i pretpostavka o homogenosti valjane ako pogledamo pvrijednosti testova. (Sta je s ovom jednom vecom p vrijednosti kod KS testa???)
+Provedimo sada ANOVA test kako bi testirali našu osnovnu pretpostavku. Postavljamo hipoteze:
+$$ \begin{aligned}
+  H_0 & : \mu_1 = \mu_2 = \ldots = \mu_k \\
+  H_1 & : \text{barem dvije sredine nisu iste}.
+\end{aligned} $$
+```{r}
+a = aov(data$LogCreditAmount ~ data$Property)
+summary(a)
+```
+Na temelju p-vrijednosti zaključujemo kako na razini značajnosti od 5% možemo odbaciti nultu hipotezu, odnosno vidimo da postoje razlike u traženom iznosu kredita s obzirom na imovinu klijenta.
+
+Zadnje testirajmo možemo li temeljem drugih dostupnih varijabli predvidjeti hoće li nastupiti default za odredenog klijenta. Zanima nas koje varijable povećavaju tu vjerojatnost. 
+```{r}
+require(caret)
+
+logreg.mdl = glm(Default ~ AccountStatus + Duration + CreditHistory + Purpose + CreditAmount + Account + EmploymentSince + PercentOfIncome + Gender + MaritalStatus + OtherDebtors + ResidenceSince + Property + Age + OtherInstallPlans + Housing + NumExistingCredits + Job + NumberOfDependents + Telephone + ForeignWorker, data = data, family = binomial())
+summary(logreg.mdl)
+
+Rsq = 1 - logreg.mdl$deviance/logreg.mdl$null.deviance
+Rsq
+```
+
