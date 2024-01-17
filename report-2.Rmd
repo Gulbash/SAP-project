@@ -30,7 +30,7 @@ Ključna stvar je korištenje ispravnih testova te dobivanje validnih rezultata.
 2.  Osnovna prilagodba podataka
 3.  Možemo li temeljem drugih dostupnih varijabli predvidjeti hoće li nastupiti *default* za određenog klijenta? Koje varijable povežavaju tu vjerojatnost?
 4.  Jesu li muškarci skloniji nesipunjavanja obaveza po kreditu od žena?
-5. Postoje li razlike u traženom iznosu klijenta prema imovini klijenta?
+5.  Postoje li razlike u traženom iznosu klijenta prema imovini klijenta?
 6.  Zaključak
 
 ### **2. Osnovna prilagodba podataka**
