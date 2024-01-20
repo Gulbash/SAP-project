@@ -282,10 +282,17 @@ Suprotno onome što bi smo prvotno zaključili, analiza govori da dobra kreditna
 ```{r}
 male <- data[Gender == 'male', ]
 female <- data[Gender == 'female', ]
+```
 
-print("Postotak mušakraca koji nisu redovito ispunjavali obaveze oprema banci:")
+Postotak mušakraca koji nisu redovito ispunjavali obaveze oprema banci:
+
+```{r}
 print(as.numeric(1-table(male$Default)/count(male)))
-print("Postotak žena koje nisu redovito ispunjavali obaveze oprema banci:")
+```
+
+Postotak žena koje nisu redovito ispunjavali obaveze oprema banci:
+
+```{r}
 print(as.numeric(1-table(female$Default)/count(female)))
 ```
 
