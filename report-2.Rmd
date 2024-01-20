@@ -39,8 +39,6 @@ Najprije učitamo podatke. Od iznimne je važnosti ispravno proučavanje istih, 
 
 ```{r}
 data = read.csv('procjena_kreditnog_rizika.csv')
-summary(data)
-head(data)
 ```
 
 Nakon učitavanja podataka iste zbog preglednosti čistimo i uljepšavamo:
