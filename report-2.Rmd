@@ -1,5 +1,5 @@
 ---
-title: ""Statistička analiza podataka - projekt"
+title: "Statistička analiza podataka - projekt"
 author: "AMMP"
 date: "`r Sys.Date()`"
 output:
@@ -45,77 +45,67 @@ Nakon učitavanja podataka iste zbog preglednosti čistimo i uljepšavamo:
 
 ```{r}
 data$Default <- as.logical(data$Default)
-data$ResidenceSince <-
-  ifelse(data$ResidenceSince == ".. >= 7 years",
-         "... >= 7 years",
-         data$ResidenceSince)
-data$NumExistingCredits <-
-  gsub("above", "... >=", data$NumExistingCredits)
+
+data$ResidenceSince <- ifelse(data$ResidenceSince == ".. >= 7 years",
+                              "... >= 7 years",
+                              data$ResidenceSince)
+
+data$NumExistingCredits <- gsub("above", "... >=", data$NumExistingCredits)
 data$NumExistingCredits <- gsub("or", "||", data$NumExistingCredits)
-data$NumberOfDependents <-
-  gsub("less than", "... <", data$NumberOfDependents)
-data$NumberOfDependents <-
-  gsub("3 or more", "... >= 3", data$NumberOfDependents)
+
+data$NumberOfDependents <- gsub("less than", "... <", data$NumberOfDependents)
+data$NumberOfDependents <- gsub("3 or more", "... >= 3", data$NumberOfDependents)
+```
+
+Sažetak očišćenih podataka:
+
+```{r}
+summary(data)
+```
+
+Prvih nekoliko redova očišćenih podataka:
+
+```{r}
+head(data)
 ```
 
 Poredamo varijable i pretvaramo podatkovni tip u faktor:
 
 ```{r}
-# should this column be ordered and does "no checking account" make this unfeasible?
-data$AccountStatus <-
-  factor(
-    data$AccountStatus,
-    levels = c("no checking account",
-               "... < 0",
-               "0 <= ... < 200",
-               "... >= 200")
+
+data$AccountStatus <- factor(
+  data$AccountStatus,
+  levels = c("no checking account", "... < 0", "0 <= ... < 200", "... >= 200")
+)
+
+data$CreditHistory <- factor(
+  data$CreditHistory,
+  levels = c(
+    "critical account/ other credits existing (not at this bank)",
+    "delay in paying off in the past",
+    "existing credits paid back duly till now",
+    "all credits at this bank paid back duly",
+    "no credits taken/ all credits paid back duly"
   )
-# should this column be ordered and does the ordering make sense?
-data$CreditHistory <-
-  factor(
-    data$CreditHistory,
-    levels = c(
-      "critical account/ other credits existing (not at this bank)",
-      "delay in paying off in the past",
-      "existing credits paid back duly till now",
-      "all credits at this bank paid back duly",
-      "no credits taken/ all credits paid back duly"
-    )
-  )
+)
+
 data$Purpose <- factor(data$Purpose)
-# should this column be ordered and does "unknown/ no savings account" make this unfeasible?
-data$Account <-
-  factor(
-    data$Account,
-    levels = c(
-      "unknown/ no savings account",
-      "... < 100",
-      "100 <= ... < 500",
-      "500 <= ... < 1000",
-      "... >= 1000"
-    )
-  )
-# should this column be ordered and does "unemployed" make this unfeasible?
-data$EmploymentSince <-
-  factor(
-    data$EmploymentSince,
-    levels = c(
-      "unemployed",
-      "... < 1 year",
-      "1 <= ... < 4 years",
-      "4 <= ... < 7 years",
-      "... >= 7 years"
-    )
-  )
-data$PercentOfIncome <-
-  factor(
-    data$PercentOfIncome,
-    levels = c("... < 20%",
-               "20% <= ... < 25%",
-               "25% <= ... < 35%",
-               "... >= 35%")
-  )
-# Dividing PersonalStatus column to Sex and MaritalStatus
+
+data$Account <- factor(
+  data$Account,
+  levels = c("unknown/ no savings account", "... < 100", "100 <= ... < 500", "500 <= ... < 1000", "... >= 1000")
+)
+
+data$EmploymentSince <- factor(
+  data$EmploymentSince,
+  levels = c("unemployed", "... < 1 year", "1 <= ... < 4 years", "4 <= ... < 7 years", "... >= 7 years")
+)
+
+data$PercentOfIncome <- factor(
+  data$PercentOfIncome,
+  levels = c("... < 20%", "20% <= ... < 25%", "25% <= ... < 35%", "... >= 35%")
+)
+
 split_parts <- strsplit(as.character(data$PersonalStatus), " - ")
 data$Gender <- sapply(split_parts, function(x) x[1])
 data$MaritalStatus <- sapply(split_parts, function(x) x[2])
@@ -124,48 +114,45 @@ data <- data %>% select(Gender, MaritalStatus, everything())
 data$Gender <- factor(data$Gender)
 data$MaritalStatus <- factor(data$MaritalStatus)
 data$OtherDebtors <- factor(data$OtherDebtors)
-data$ResidenceSince <-
-  factor(
-    data$ResidenceSince,
-    levels = c("... < 1 year",
-               "1 <= ... < 4 years",
-               "4 <= ... < 7 years",
-               "... >= 7 years")
-  )
+
+data$ResidenceSince <- factor(
+  data$ResidenceSince,
+  levels = c("... < 1 year", "1 <= ... < 4 years", "4 <= ... < 7 years", "... >= 7 years")
+)
+
 data$Property <- factor(data$Property)
 data$OtherInstallPlans <- factor(data$OtherInstallPlans)
 data$Housing <- factor(data$Housing)
-data$NumExistingCredits <-
-  factor(data$NumExistingCredits,
-         levels = c("1",
-                    "2 || 3",
-                    "4 || 5",
-                    "... >= 6"))
-# should this column be ordered?
-data$Job <-
-  factor(
-    data$Job,
-    levels = c(
-      "unemployed/ unskilled - non-resident",
-      "unskilled - resident",
-      "skilled employee / official",
-      "management/ self-employed/highly qualified employee/ officer"
-    )
+
+data$NumExistingCredits <- factor(
+  data$NumExistingCredits,
+  levels = c("1", "2 || 3", "4 || 5", "... >= 6")
+)
+
+data$Job <- factor(
+  data$Job,
+  levels = c(
+    "unemployed/ unskilled - non-resident",
+    "unskilled - resident",
+    "skilled employee / official",
+    "management/ self-employed/highly qualified employee/ officer"
   )
-data$NumberOfDependents <-
-  factor(data$NumberOfDependents, levels = c("... < 3",
-                                             "... >= 3"))
+)
+
+data$NumberOfDependents <- factor(data$NumberOfDependents, levels = c("... < 3", "... >= 3"))
 data$Telephone <- factor(data$Telephone)
 data$ForeignWorker <- factor(data$ForeignWorker)
 data$Default <- factor(data$Default)
-```
 
-```{r}
+head(data)
 attach(data)
 head(data)
+
 ```
 
-Računamo i prikazujemo matricu korelacije. Želimo vidjeti kako se pojedinačne varijable posebno koreliraju s varijablom "default", stoga ćemo zasebno nacrtati taj grafikon. Cilj je pronaći i bolje istražiti varijable koje imaju veći utjecaj na konačni ishod varijable "default":
+### **3.  Možemo li temeljem drugih dostupnih varijabli predvidjeti hoće li nastupiti *default* za određenog klijenta? Koje varijable povežavaju tu vjerojatnost?**
+
+Računamo i prikazujemo matricu korelacije. Želimo vidjeti kako se pojedinačne varijable posebno koreliraju s varijablom "default", stoga ćemo zasebno nacrtati taj grafikon. Cilj je pronaći i bolje istražiti varijable koje imaju veći utjecaj na konačni ishod varijable "default" (zaduženje).
 
 ```{r}
 library(corrplot)
@@ -178,100 +165,112 @@ barplot(cor_with_target, names.arg = names(cor_with_target),
          las = 2, 
          cex.names = 0.8,
          col = ifelse(cor_with_target > 0, "blue", "red"),
-         main = paste("Correlations with Default variable"),
-         ylab = "Correlation")
+         main = paste("Korelacije s varijablom 'Default'"),
+         ylab = "Korelacija")
 
 filt_cor_with_target <- cor_with_target[abs(cor_with_target) >= 0.1 & cor_with_target != 1]
 print(names(filt_cor_with_target))
+
 ```
 
-There are 5 variables that has an absolute correlation greater or equal to 0.1. Those variables may have greater predictive power than the other ones that are poorly correlated with variable 'Default'. Let's explore them further. We'll start with 'AccountStatus' which tells us a current state of person's account if they even have one.
+Postoje 5 varijabli koje imaju apsolutnu korelaciju veću ili jednaku 0,1. Te varijable mogu imati veću prediktivnu moć od ostalih koje slabo koreliraju s varijablom 'Default'. Proučit ćemo ih detaljnije. Počet ćemo s 'AccountStatus', koji nam govori o trenutnom stanju računa osobe, ako ga uopće ima.
+
 
 ```{r}
-barplot(table(Default, AccountStatus), main = "Number of defaults based on account status", 
-        border="white", col = c('blue', 'red'), xlab="Account Status", ylim = c(0, 400))
+
+barplot(table(Default, AccountStatus), main = "Broj neizvršenja plaćanja prema statusu računa", 
+        border = "white", col = c('blue', 'red'), xlab = "Status računa", ylim = c(0, 400))
 abline(h = seq(0, 500, by = 50), col = "gray", lty = 2)
-legend("topright", legend = levels(Default), fill = c('blue', 'red'), title = "Default")
+legend("topright", legend = levels(Default), fill = c('blue', 'red'), title = "Zaduženje")
+
 ```
 
-What we see here is that the correlation result is heavily influenced by 'no checking account' value which doesn't tell us much. If we drop that value (which we can't do because we would lose almost 40% of our data) we would see negative correlation. That would be more in line with our expectation that the more money someone has in their account, the lower the chance of default is. We continue with variable 'Duration', which is numeric variable and could give us more information.
+Ono što vidimo ovdje jest da je rezultat korelacije snažno utjecan vrijednošću 'no checking account', što nam ne pruža puno informacija. Ako bismo isključili tu vrijednost (što ne možemo jer bismo izgubili gotovo 40% podataka), vidjeli bismo negativnu korelaciju. To bi više odgovaralo našem očekivanju da što netko ima više novca na računu, to je manja vjerojatnost da će doći do neizvršenja plaćanja. Nastavljamo s varijablom 'Duration', koja je numerička varijabla i mogla bi nam pružiti više informacija.
 
 ```{r}
-hist(Duration, col = 'lightgreen', ylim = c(0, 300), main = 'Histogram of duration')
+hist(Duration, col = 'lightgreen', ylim = c(0, 300), main = 'Histogram trajanja')
 
-boxplot(Duration, col = 'lightgreen', main = 'Boxplot of duration')
+boxplot(Duration, col = 'lightgreen', main = 'Boxplot trajanja')
 abline(h = seq(0, 70, by = 12), col = "gray", lty = 2)
 
 defaulted <- data[Default == 'TRUE', ]
 not_defaulted <- data[Default == 'FALSE', ]
 
-hist(defaulted$Duration, breaks=10, xlim=c(0,75), ylim = c(0,250), col=rgb(1,0,0,0.5),
-     xlab="Duration", ylab="Frequency", main="Distribution of Duration based on Default" )
-hist(not_defaulted$Duration, breaks=10, xlim=c(0,75), ylim = c(0,250), col=rgb(0,0,1,0.5), add=T)
-legend("topright", legend = levels(Default), fill = c(rgb(0,0,1,0.5), rgb(1,0,0,0.5)), title = "Default")
+hist(defaulted$Duration, breaks = 10, xlim = c(0, 75), ylim = c(0, 250), col = rgb(1, 0, 0, 0.5),
+     xlab = "Trajanje", ylab = "Frekvencija", main = "Distribucija trajanja prema zaduženju" )
+hist(not_defaulted$Duration, breaks = 10, xlim = c(0, 75), ylim = c(0, 250), col = rgb(0, 0, 1, 0.5), add = TRUE)
+legend("topright", legend = levels(Default), fill = c(rgb(0, 0, 1, 0.5), rgb(1, 0, 0, 0.5)), title = "Zaduženje")
 
-hist(defaulted$Duration, breaks=10, xlim=c(0,75), ylim = c(0,0.1), freq = FALSE, col=rgb(1,0,0,0.5), xlab="Duration", 
-     ylab="Relative frequency", main="Distribution of Duration")
-hist(not_defaulted$Duration, breaks=10, freq = FALSE, xlim=c(0,75), col=rgb(0,0,1,0.5), add=T)
-legend("topright", legend = levels(Default), fill = c(rgb(0,0,1,0.5), rgb(1,0,0,0.5)), title = "Default")
+hist(defaulted$Duration, breaks = 10, xlim = c(0, 75), ylim = c(0, 0.1), freq = FALSE, col = rgb(1, 0, 0, 0.5), xlab = "Trajanje", 
+     ylab = "Relativna frekvencija", main = "Distribucija trajanja prema zaduženju")
+hist(not_defaulted$Duration, breaks = 10, freq = FALSE, xlim = c(0, 75), col = rgb(0, 0, 1, 0.5), add = TRUE)
+legend("topright", legend = levels(Default), fill = c(rgb(0, 0, 1, 0.5), rgb(1, 0, 0, 0.5)), title = "Zaduženje")
 
 ```
 
-Seeing the distribution of variable 'Duration', we can conclude that most of the credits are short-term. We also suspect that there are some outliers in the data, credits with duration of 50 or more months. Boxplot gives us a confirmation and also tells us that at least 50% of data is between 12 and 24. The next thing that interest to us is which of those credits ended up being paid off. The positive correlation suggests that the longer the duration of a credit is, greater the chance of default. That is also what we see in separated histograms for defaulted and non defaulted credits. Duration of a credit won't give us the full perspective. To compliment that variable, we'll use 'CreditAmount'.
+
+Gledajući distribuciju varijable 'Duration', možemo zaključiti da je većina kredita kratkoročna. Također pretpostavljamo da postoje neki izvanredni podaci, krediti s trajanjem od 50 ili više mjeseci. Boxplot nam to potvrđuje i također nam govori da je barem 50% podataka između 12 i 24 mjeseca. Sljedeće što nas zanima je koji od tih kredita su završili s plaćanjem. Pozitivna korelacija sugerira da što je duže trajanje kredita, veća je vjerojatnost neizvršenja plaćanja. To je i ono što vidimo u odvojenim histogramima za kredite s neizvršenjem plaćanja i one bez neizvršenja plaćanja. Trajanje kredita samo po sebi neće nam pružiti potpunu perspektivu. Kako bismo upotpunili tu varijablu, koristit ćemo 'CreditAmount'.
+
 
 ```{r}
-hist(CreditAmount, col = 'lightgreen', ylim = c(0, 500), main = 'Histogram of duration')
+hist(CreditAmount, col = 'lightgreen', ylim = c(0, 500), main = 'Histogram iznosa kredita')
 
-boxplot(CreditAmount, col = 'lightgreen', main = 'Boxplot of duration')
+boxplot(CreditAmount, col = 'lightgreen', main = 'Boxplot iznosa kredita')
 abline(h = seq(0, 20000, by = 2000), col = "gray", lty = 2)
+
 ```
 
-Both of these variables are not giving us the full information. The credit can have long duration and small amount and vice versa. Let's try to combine the two variables and see what does it give us.
+Nijedna od ovih varijabli ne pruža nam potpune informacije. Kredit može imati dugotrajnost i mali iznos, i obrnuto. Pokušajmo kombinirati ove dvije varijable i vidjeti što nam to daje.
+
 
 ```{r}
 plot(CreditAmount, Duration,
-     pch=16, 
-     cex=1, 
-     col=Default,
-     xlab="Credit amount", ylab="Duration",
-     main="Credit amount and duration relation"
+     pch = 16, 
+     cex = 1, 
+     col = Default,
+     xlab = "Iznos kredita", ylab = "Trajanje",
+     main = "Odnos iznosa kredita i trajanja"
 )
-legend("topright", legend = c("Not Default", "Default"), col = Default, pch = 16)
+legend("topright", legend = c("Bez neizvršenja plaćanja", "Neizvršenje plaćanja"), col = Default, pch = 16)
 
 MonthlyPayment = CreditAmount / Duration
 
 plot(MonthlyPayment,
-     pch=16, 
-     cex=1, 
-     col=Default,
-     ylab="Monthly Payment",
+     pch = 16, 
+     cex = 1, 
+     col = Default,
+     ylab = "Mjesečna rata",
 )
-legend("topright", legend = c("Not Default", "Default"), col = Default, pch = 16)
+legend("topright", legend = c("Bez neizvršenja plaćanja", "Neizvršenje plaćanja"), col = Default, pch = 16)
+
 ```
 
-We can see that most of the small credits with short duration are getting paid off. On the other hand, longer term credits with bigger amounts are defaulted more often. The size of monthly payment doesn't seem to have significant impact on our target variable. To conclude our list of correlated variables, let's check the final two, 'CreditHistory' and 'EmploymentSince'.
+Vidimo da se većina malih kredita s kratkim trajanjem plaća. S druge strane, dugotrajni krediti s većim iznosima češće neizvršavaju plaćanje. Veličina mjesečne rate ne čini se da ima značajan utjecaj na našu ciljanu varijablu. Kako bismo zaključili naš popis koreliranih varijabli, provjerimo posljednje dvije, 'CreditHistory' i 'EmploymentSince'.
+
 
 ```{r}
-barplot(table(Default, as.numeric(CreditHistory)), main = "Number of defaults based on Credit history", 
-        border="white", col = c('blue', 'red'), xlab="Credit History", ylab = 'Frequency', ylim = c(0, 600))
+barplot(table(Default, as.numeric(CreditHistory)), main = "Broj neizvršenja plaćanja prema kreditnoj povijesti", 
+        border = "white", col = c('blue', 'red'), xlab = "Kreditna povijest", ylab = 'Frekvencija', ylim = c(0, 600))
 abline(h = seq(0, 600, by = 50), col = "gray", lty = 2)
-legend("topright", legend = levels(Default), fill = c('blue', 'red'), title = "Default")
+legend("topright", legend = levels(Default), fill = c('blue', 'red'), title = "Zaduženje")
 
-# printing values for x axis
-cat("1 - critical account/ other credits existing (not at this bank) \
-2 - delay in paying off in the past \
-3 - existing credits paid back duly till now \
-4 - all credits at this bank paid back duly \
-5 - no credits taken/ all credits paid back duly")
+cat("1 - kritični račun / ostali postojeći krediti (ne na ovoj banci) \
+2 - kašnjenje u otplati u prošlosti \
+3 - postojeći krediti vraćeni uredno do sada \
+4 - svi krediti u ovoj banci vraćeni uredno \
+5 - nema uzetih kredita / svi krediti vraćeni uredno")
 
-barplot(table(Default, EmploymentSince), main = "Number of defaults based on years employed", 
-        border="white", col = c('blue', 'red'), xlab="Employment since", ylab = 'Frequency', ylim = c(0, 400))
+barplot(table(Default, EmploymentSince), main = "Broj neizvršenja plaćanja prema godinama zaposlenja", 
+        border = "white", col = c('blue', 'red'), xlab = "Godine zaposlenja", ylab = 'Frekvencija', ylim = c(0, 400))
 abline(h = seq(0, 400, by = 50), col = "gray", lty = 2)
-legend("topright", legend = levels(Default), fill = c('blue', 'red'), title = "Default")
+legend("topright", legend = levels(Default), fill = c('blue', 'red'), title = "Zaduženje")
+
 
 ```
 
-Contrary to what the logic would suggest, it seems that good credit history does not suggest the credit would be paid back. We'll now explore how does gender affect person's ability to pay back the loan.
+Začudo, suprotno logici, čini se da dobra kreditna povijest ne sugerira da će kredit biti vraćen.
+
+### **4. Jesu li muškarci skloniji nesipunjavanja obaveza po kreditu od žena?**
 
 ```{r}
 male <- data[Gender == 'male', ]
@@ -283,7 +282,7 @@ print("Percentage of defaulted women:")
 print(as.numeric(1-table(female$Default)/count(female)))
 ```
 
-We can see that only about 27% of men in our dataset defaulted, in comparison to around 35% women. Our statistical tests will tell if that difference is significant.
+Vidimo da je samo oko 27% muškaraca u našem skupu podataka imalo neizvršenje plaćanja, u usporedbi s otprilike 35% žena. Naši statistički testovi će reći je li ta razlika značajna.
 
 ```{r}
 boxplot(CreditAmount~PercentOfIncome, col = 'lightgreen', ylab = "Credit amount", xlab = "Percent of income")
@@ -301,6 +300,8 @@ n = c(count(male)$n, count(female)$n)
 prop.test(x, n, alternative = "less")
 ```
 Na razini značajnosti od 5% možemo zaključiti da su žene sklonije neispunjavanju kreditnih obaveza od muškaraca na temelju ovih podataka.
+
+### **5. Postoje li razlike u traženom iznosu klijenta prema imovini klijenta?**
 
 Testirajmo sada postoji li razlika u traženom iznosu kredita prema imovini klijenta. Da bismo to testirali treba nam ANOVA test. On ima određene pretpostavke koje se moramo uvjeriti da su zadovoljene prije nego krenemo na testiranje. Prva je pretpostavka pojedinih podataka u uzorcima, druge je pretpostavka normalne razdiobe podataka, a treća je pretpostavka homogenosti varijanci među populacijama. Pogledajmo prvo kako izgledaju histogrami da vidimo ima li pretpostavka o normalnosti smisla. Naše populacije se razlikuju s obzirom na imovinu koju osoba posjeduje, a proučavamo iznos kredita.
 
@@ -340,15 +341,15 @@ $$ \begin{aligned}
 a = aov(data$LogCreditAmount ~ data$Property)
 summary(a)
 
-# Boxplot for visualization of differences
 boxplot(data$LogCreditAmount ~ data$Property, main = "Boxplot of log credit amount by property", xlab = "Property", ylab = "Log credit amount")
 
-# Diagnostic plots for ANOVA model
 plot(a)
 ```
+
 Na temelju p-vrijednosti zaključujemo kako na razini značajnosti od 5% možemo odbaciti nultu hipotezu, odnosno vidimo da postoje razlike u traženom iznosu kredita s obzirom na imovinu klijenta.
 
 Zadnje testirajmo možemo li temeljem drugih dostupnih varijabli predvidjeti hoće li nastupiti default za odredenog klijenta. Zanima nas koje varijable povećavaju tu vjerojatnost. 
+
 ```{r}
 require(caret)
 
@@ -386,4 +387,6 @@ cv_model <- train(formula, data = data, method = "glm", family = binomial(), trC
 print(cv_model)
 
 ```
+
+### **6. Zaključak**
 
