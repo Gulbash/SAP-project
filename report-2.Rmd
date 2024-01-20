@@ -313,6 +313,7 @@ n = c(count(male)$n, count(female)$n)
 
 prop.test(x, n, alternative = "less")
 ```
+
 Na razini značajnosti od 5% možemo zaključiti da su žene sklonije neispunjavanju kreditnih obaveza od muškaraca na temelju ovih podataka.
 
 ### **5. Postoje li razlike u traženom iznosu klijenta prema imovini klijenta?**
