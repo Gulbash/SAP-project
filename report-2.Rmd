@@ -257,6 +257,7 @@ barplot(table(Default, as.numeric(CreditHistory)), main = 'Broj "defaultova" pre
 abline(h = seq(0, 600, by = 50), col = "gray", lty = 2)
 legend("topright", legend = levels(Default), fill = c('blue', 'red'), title = "Default")
 ```
+
 Opis stupaca grafa:
 
 1 - Kritični račun / ostali postojeći krediti (ne na ovoj banci) \
