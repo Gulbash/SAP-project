@@ -28,7 +28,7 @@ Ključna stvar je korištenje ispravnih testova te dobivanje validnih rezultata.
 
 1.  Sadržaj
 2.  Osnovna prilagodba podataka
-3.  Možemo li temeljem drugih dostupnih varijabli predvidjeti hoće li nastupiti *default* za određenog klijenta? Koje varijable povežavaju tu vjerojatnost?
+3.  Možemo li temeljem drugih dostupnih varijabli predvidjeti hoće li nastupiti "default" za određenog klijenta? Koje varijable povežavaju tu vjerojatnost?
 4.  Jesu li muškarci skloniji nesipunjavanja obaveza po kreditu od žena?
 5.  Postoje li razlike u traženom iznosu klijenta prema imovini klijenta?
 6.  Zaključak
@@ -144,7 +144,6 @@ data$Telephone <- factor(data$Telephone)
 data$ForeignWorker <- factor(data$ForeignWorker)
 data$Default <- factor(data$Default)
 
-head(data)
 attach(data)
 head(data)
 
@@ -152,10 +151,14 @@ head(data)
 
 ### **3.  Možemo li temeljem drugih dostupnih varijabli predvidjeti hoće li nastupiti *default* za određenog klijenta? Koje varijable povežavaju tu vjerojatnost?**
 
-Računamo i prikazujemo matricu korelacije. Želimo vidjeti kako se pojedinačne varijable posebno koreliraju s varijablom "default", stoga ćemo zasebno nacrtati taj grafikon. Cilj je pronaći i bolje istražiti varijable koje imaju veći utjecaj na konačni ishod varijable "default" (zaduženje).
+Računamo i prikazujemo matricu korelacije. Želimo vidjeti kako se pojedinačne varijable posebno koreliraju s varijablom "default", stoga ćemo zasebno nacrtati taj grafikon. Cilj je pronaći i bolje istražiti varijable koje imaju veći utjecaj na konačni ishod varijable "default":
 
 ```{r}
 library(corrplot)
+```
+
+Ispisujemo matricu korelacije:
+```{r}
 
 corr_matrix <- cor(data.frame(lapply(data, function(x) as.numeric(x))))
 corrplot(corr_matrix, method = "color", type = "upper", tl.col = "black", tl.srt = 90)
@@ -165,7 +168,7 @@ barplot(cor_with_target, names.arg = names(cor_with_target),
          las = 2, 
          cex.names = 0.8,
          col = ifelse(cor_with_target > 0, "blue", "red"),
-         main = paste("Korelacije s varijablom 'Default'"),
+         main = paste('Korelacije s varijablom "Default"'),
          ylab = "Korelacija")
 
 filt_cor_with_target <- cor_with_target[abs(cor_with_target) >= 0.1 & cor_with_target != 1]
@@ -173,54 +176,54 @@ print(names(filt_cor_with_target))
 
 ```
 
-Postoje 5 varijabli koje imaju apsolutnu korelaciju veću ili jednaku 0,1. Te varijable mogu imati veću prediktivnu moć od ostalih koje slabo koreliraju s varijablom 'Default'. Proučit ćemo ih detaljnije. Počet ćemo s 'AccountStatus', koji nam govori o trenutnom stanju računa osobe, ako ga uopće ima.
+Postoje 5 varijabli koje imaju apsolutnu korelaciju veću ili jednaku 0,1. Te varijable mogu imati veću prediktivnu moć od ostalih koje slabo koreliraju s varijablom "Default". Proučit ćemo ih detaljnije. Počet ćemo s "AccountStatus", koji nam govori o trenutnom stanju računa osobe, ako ga uopće ima:
 
 
 ```{r}
 
-barplot(table(Default, AccountStatus), main = "Broj neizvršenja plaćanja prema statusu računa", 
+barplot(table(Default, AccountStatus), main = 'Broj "defaultova" prema statusu računa', 
         border = "white", col = c('blue', 'red'), xlab = "Status računa", ylim = c(0, 400))
 abline(h = seq(0, 500, by = 50), col = "gray", lty = 2)
-legend("topright", legend = levels(Default), fill = c('blue', 'red'), title = "Zaduženje")
+legend("topright", legend = levels(Default), fill = c('blue', 'red'), title = "Default")
 
 ```
 
-Ono što vidimo ovdje jest da je rezultat korelacije snažno utjecan vrijednošću 'no checking account', što nam ne pruža puno informacija. Ako bismo isključili tu vrijednost (što ne možemo jer bismo izgubili gotovo 40% podataka), vidjeli bismo negativnu korelaciju. To bi više odgovaralo našem očekivanju da što netko ima više novca na računu, to je manja vjerojatnost da će doći do neizvršenja plaćanja. Nastavljamo s varijablom 'Duration', koja je numerička varijabla i mogla bi nam pružiti više informacija.
+Ono što vidimo ovdje jest da je rezultat korelacije snažno utjecan vrijednošću varijable "no checking account", što nam ne pruža puno informacija. Ako bismo isključili tu vrijednost (što ne možemo jer bismo izgubili gotovo 40% podataka), vidjeli bismo negativnu korelaciju. To bi više odgovaralo našem očekivanju da što netko ima više novca na računu, to je manja vjerojatnost da će doći do neizvršenja plaćanja. Nastavljamo s varijablom "Duration", koja je numerička varijabla i mogla bi nam pružiti više informacija:
 
 ```{r}
-hist(Duration, col = 'lightgreen', ylim = c(0, 300), main = 'Histogram trajanja')
+hist(Duration, col = 'lightgreen', ylim = c(0, 300), main = 'Histogram varijable "Duration"')
 
-boxplot(Duration, col = 'lightgreen', main = 'Boxplot trajanja')
+boxplot(Duration, col = 'lightgreen', main = 'Boxplot varijable "Duration"')
 abline(h = seq(0, 70, by = 12), col = "gray", lty = 2)
 
 defaulted <- data[Default == 'TRUE', ]
 not_defaulted <- data[Default == 'FALSE', ]
 
 hist(defaulted$Duration, breaks = 10, xlim = c(0, 75), ylim = c(0, 250), col = rgb(1, 0, 0, 0.5),
-     xlab = "Trajanje", ylab = "Frekvencija", main = "Distribucija trajanja prema zaduženju" )
+     xlab = 'Duration', ylab = 'Frequency', main = 'Distribucija varijable "Duration" prema varijabli "Default"' )
 hist(not_defaulted$Duration, breaks = 10, xlim = c(0, 75), ylim = c(0, 250), col = rgb(0, 0, 1, 0.5), add = TRUE)
-legend("topright", legend = levels(Default), fill = c(rgb(0, 0, 1, 0.5), rgb(1, 0, 0, 0.5)), title = "Zaduženje")
+legend("topright", legend = levels(Default), fill = c(rgb(0, 0, 1, 0.5), rgb(1, 0, 0, 0.5)), title = "Default")
 
-hist(defaulted$Duration, breaks = 10, xlim = c(0, 75), ylim = c(0, 0.1), freq = FALSE, col = rgb(1, 0, 0, 0.5), xlab = "Trajanje", 
-     ylab = "Relativna frekvencija", main = "Distribucija trajanja prema zaduženju")
+hist(defaulted$Duration, breaks = 10, xlim = c(0, 75), ylim = c(0, 0.1), freq = FALSE, col = rgb(1, 0, 0, 0.5), xlab = 'Duration', 
+     ylab = "Relativna frekvencija", main = 'Distribucija varijable "Duration"')
 hist(not_defaulted$Duration, breaks = 10, freq = FALSE, xlim = c(0, 75), col = rgb(0, 0, 1, 0.5), add = TRUE)
-legend("topright", legend = levels(Default), fill = c(rgb(0, 0, 1, 0.5), rgb(1, 0, 0, 0.5)), title = "Zaduženje")
+legend("topright", legend = levels(Default), fill = c(rgb(0, 0, 1, 0.5), rgb(1, 0, 0, 0.5)), title = "Default")
 
 ```
 
 
-Gledajući distribuciju varijable 'Duration', možemo zaključiti da je većina kredita kratkoročna. Također pretpostavljamo da postoje neki izvanredni podaci, krediti s trajanjem od 50 ili više mjeseci. Boxplot nam to potvrđuje i također nam govori da je barem 50% podataka između 12 i 24 mjeseca. Sljedeće što nas zanima je koji od tih kredita su završili s plaćanjem. Pozitivna korelacija sugerira da što je duže trajanje kredita, veća je vjerojatnost neizvršenja plaćanja. To je i ono što vidimo u odvojenim histogramima za kredite s neizvršenjem plaćanja i one bez neizvršenja plaćanja. Trajanje kredita samo po sebi neće nam pružiti potpunu perspektivu. Kako bismo upotpunili tu varijablu, koristit ćemo 'CreditAmount'.
+Gledajući distribuciju varijable "Duration", možemo zaključiti da je većina kredita kratkoročna. Također pretpostavljamo da postoje neki izvanredni podaci, krediti s trajanjem od 50 ili više mjeseci. Boxplot nam to potvrđuje i također nam govori da je barem 50% podataka između 12 i 24 mjeseca. Sljedeće što nas zanima je koji od tih kredita su završili s plaćanjem. Pozitivna korelacija sugerira da što je duže trajanje kredita, veća je vjerojatnost neizvršenja plaćanja. To je i ono što vidimo u odvojenim histogramima za kredite s neizvršenjem plaćanja i one bez neizvršenja plaćanja. Trajanje kredita samo po sebi neće nam pružiti potpunu perspektivu. Kako bismo upotpunili tu varijablu, koristit ćemo "CreditAmount":
 
 
 ```{r}
-hist(CreditAmount, col = 'lightgreen', ylim = c(0, 500), main = 'Histogram iznosa kredita')
+hist(CreditAmount, col = 'lightgreen', ylim = c(0, 500), main = 'Histogram varijable "Duration"')
 
-boxplot(CreditAmount, col = 'lightgreen', main = 'Boxplot iznosa kredita')
+boxplot(CreditAmount, col = 'lightgreen', main = 'Boxplot varijable "Duration"')
 abline(h = seq(0, 20000, by = 2000), col = "gray", lty = 2)
 
 ```
 
-Nijedna od ovih varijabli ne pruža nam potpune informacije. Kredit može imati dugotrajnost i mali iznos, i obrnuto. Pokušajmo kombinirati ove dvije varijable i vidjeti što nam to daje.
+Nijedna od ovih varijabli ne pruža nam potpune informacije. Kredit može imati dugotrajnost i mali iznos, i obrnuto. Pokušajmo kombinirati ove dvije varijable i vidjeti što nam to daje:
 
 
 ```{r}
@@ -228,10 +231,10 @@ plot(CreditAmount, Duration,
      pch = 16, 
      cex = 1, 
      col = Default,
-     xlab = "Iznos kredita", ylab = "Trajanje",
-     main = "Odnos iznosa kredita i trajanja"
+     xlab = 'CreditAmount', ylab = 'Duration',
+     main = 'Odnos varijabli "CreditAmount" i "Duration"'
 )
-legend("topright", legend = c("Bez neizvršenja plaćanja", "Neizvršenje plaćanja"), col = Default, pch = 16)
+legend("topright", legend = c('nije "Default"', '"Default"'), col = Default, pch = 16)
 
 MonthlyPayment = CreditAmount / Duration
 
@@ -241,34 +244,37 @@ plot(MonthlyPayment,
      col = Default,
      ylab = "Mjesečna rata",
 )
-legend("topright", legend = c("Bez neizvršenja plaćanja", "Neizvršenje plaćanja"), col = Default, pch = 16)
+legend("topright", legend = c('nije "Default"', '"Default"'), col = Default, pch = 16)
 
 ```
 
-Vidimo da se većina malih kredita s kratkim trajanjem plaća. S druge strane, dugotrajni krediti s većim iznosima češće neizvršavaju plaćanje. Veličina mjesečne rate ne čini se da ima značajan utjecaj na našu ciljanu varijablu. Kako bismo zaključili naš popis koreliranih varijabli, provjerimo posljednje dvije, 'CreditHistory' i 'EmploymentSince'.
+Vidimo da se većina malih kredita s kratkim trajanjem vraća. S druge strane, dugotrajni krediti s većim iznosima češće budu neplaćeni. Veličina mjesečne rate ne čini se da ima značajan utjecaj na našu ciljanu varijablu. Kako bismo zaključili naš popis koreliranih varijabli, provjerimo posljednje dvije, "CreditHistory" i "EmploymentSince":
 
 
 ```{r}
-barplot(table(Default, as.numeric(CreditHistory)), main = "Broj neizvršenja plaćanja prema kreditnoj povijesti", 
-        border = "white", col = c('blue', 'red'), xlab = "Kreditna povijest", ylab = 'Frekvencija', ylim = c(0, 600))
+barplot(table(Default, as.numeric(CreditHistory)), main = 'Broj "defaultova" prema varijabli "CreditHistory"', 
+        border = "white", col = c('blue', 'red'), xlab = "CreditHistory", ylab = "Frequency", ylim = c(0, 600))
 abline(h = seq(0, 600, by = 50), col = "gray", lty = 2)
-legend("topright", legend = levels(Default), fill = c('blue', 'red'), title = "Zaduženje")
+legend("topright", legend = levels(Default), fill = c('blue', 'red'), title = "Default")
+```
+Opis stupaca grafa:
 
-cat("1 - kritični račun / ostali postojeći krediti (ne na ovoj banci) \
-2 - kašnjenje u otplati u prošlosti \
-3 - postojeći krediti vraćeni uredno do sada \
-4 - svi krediti u ovoj banci vraćeni uredno \
-5 - nema uzetih kredita / svi krediti vraćeni uredno")
+1 - Kritični račun / ostali postojeći krediti (ne na ovoj banci) \
+2 - U prošlosti kašnjenje u otplati \
+3 - Postojeći krediti do sada uredno vraćeni \
+4 - Svi krediti u ovoj banci uredno vraćeni \
+5 - Nema kredita / svi krediti uredno vraćeni
 
-barplot(table(Default, EmploymentSince), main = "Broj neizvršenja plaćanja prema godinama zaposlenja", 
-        border = "white", col = c('blue', 'red'), xlab = "Godine zaposlenja", ylab = 'Frekvencija', ylim = c(0, 400))
+```{r}
+barplot(table(Default, EmploymentSince), main = 'Broj "defaultova" prema godinama radnog staža', 
+        border = "white", col = c('blue', 'red'), xlab = 'EmploymentSince', ylab = 'Frequency', ylim = c(0, 400))
 abline(h = seq(0, 400, by = 50), col = "gray", lty = 2)
-legend("topright", legend = levels(Default), fill = c('blue', 'red'), title = "Zaduženje")
+legend("topright", legend = levels(Default), fill = c('blue', 'red'), title = "Default")
 
 
 ```
 
-Začudo, suprotno logici, čini se da dobra kreditna povijest ne sugerira da će kredit biti vraćen.
+Suprotno onome što bi smo prvotno zaključili, analiza govori da dobra kreditna povijest ne znači da će kredit uredno biti vraćan.
 
 ### **4. Jesu li muškarci skloniji nesipunjavanja obaveza po kreditu od žena?**
 
@@ -276,20 +282,20 @@ Začudo, suprotno logici, čini se da dobra kreditna povijest ne sugerira da će
 male <- data[Gender == 'male', ]
 female <- data[Gender == 'female', ]
 
-print("Percentage of defaulted men:")
+print("Postotak mušakraca koji nisu redovito ispunjavali obaveze oprema banci:")
 print(as.numeric(1-table(male$Default)/count(male)))
-print("Percentage of defaulted women:")
+print("Postotak žena koje nisu redovito ispunjavali obaveze oprema banci:")
 print(as.numeric(1-table(female$Default)/count(female)))
 ```
 
-Vidimo da je samo oko 27% muškaraca u našem skupu podataka imalo neizvršenje plaćanja, u usporedbi s otprilike 35% žena. Naši statistički testovi će reći je li ta razlika značajna.
+Vidimo da je samo oko 27% muškaraca u našem skupu podataka imalo neizvršenje plaćanja, u usporedbi s otprilike 35% žena. Naši će statistički testovi reći je li ta razlika značajna:
 
 ```{r}
-boxplot(CreditAmount~PercentOfIncome, col = 'lightgreen', ylab = "Credit amount", xlab = "Percent of income")
+boxplot(CreditAmount~PercentOfIncome, col = 'lightgreen', ylab = "CreditAmount", xlab = "PercentOfIncome")
 abline(h = seq(0, 20000, by = 2000), col = "gray", lty = 2)
 ```
 
-Na temelju proučavanja podataka ima smisla testirati hipotezu da su žene sklonije neispunjavanju kreditnih obaveza od muškaraca. Kako bismo to testirali koristimo test proporcija. Kao nultu hipotezu pretpostavljamo jednakost proporcija dok za alternativnu hipotezu stavimo da je manji udio muškaraca nego žena koji ne ispunjavaju kreditne obaveze.
+Na temelju proučavanja podataka ima smisla testirati hipotezu da su žene sklonije neispunjavanju kreditnih obaveza od muškaraca. Kako bismo to testirali koristimo test proporcija. Kao nultu hipotezu pretpostavljamo jednakost proporcija dok za alternativnu hipotezu stavimo da je manji udio muškaraca nego žena koji ne ispunjavaju kreditne obaveze:
 
 ```{r}
 male_default_count = sum(male$Default==TRUE)
@@ -303,46 +309,64 @@ Na razini značajnosti od 5% možemo zaključiti da su žene sklonije neispunjav
 
 ### **5. Postoje li razlike u traženom iznosu klijenta prema imovini klijenta?**
 
-Testirajmo sada postoji li razlika u traženom iznosu kredita prema imovini klijenta. Da bismo to testirali treba nam ANOVA test. On ima određene pretpostavke koje se moramo uvjeriti da su zadovoljene prije nego krenemo na testiranje. Prva je pretpostavka pojedinih podataka u uzorcima, druge je pretpostavka normalne razdiobe podataka, a treća je pretpostavka homogenosti varijanci među populacijama. Pogledajmo prvo kako izgledaju histogrami da vidimo ima li pretpostavka o normalnosti smisla. Naše populacije se razlikuju s obzirom na imovinu koju osoba posjeduje, a proučavamo iznos kredita.
+Testirajmo sada postoji li razlika u traženom iznosu kredita prema imovini klijenta. Da bismo to testirali koristimo ANOVA test. On ima određene pretpostavke u čiju se zadovoljenost moramo uvjeriti prije nego krenemo na testiranje. Prva je pretpostavka pojedinih podataka u uzorcima, druge je pretpostavka normalne razdiobe podataka, a treća je pretpostavka homogenosti varijanci među populacijama. Naše populacije se razlikuju s obzirom na imovinu koju osoba posjeduje, a proučavamo iznos kredita. Pogledajmo prvo kako izgledaju histogrami da vidimo ima li pretpostavka o normalnosti smisla.
 
+Histogrami iznosa kredita obzirom na vrstu imovine: 
 ```{r}
 for (item in unique(data$Property)) {
-  hist(data$CreditAmount[data$Property==item], main = paste("Histogram of credit amount with property" , item), xlab = 'Credit amount')
+  hist(data$CreditAmount[data$Property==item], main = paste("", item), xlab = "CreditAmount")
 }
+
 ```
-Vidimo kako pretpostavka o normalnosti nema smisla no probajmo sada logaritmirati podatke pa onda provesti Lillieforsovu inačicu KS testa.
+
+Vidimo kako pretpostavka o normalnosti nema smisla. No, probajmo sada logaritmirati podatke pa provesti Lillieforsovu inačicu KS testa.
+
+Histogrami logaritmiranog iznosa kredita obzirom na vrstu imovine: 
 
 ```{r}
 require(nortest)
 
-data$LogCreditAmount<-log(data$CreditAmount)
+data$LogCreditAmount <- log(data$CreditAmount)
 
 for (item in unique(data$Property)) {
-  print(lillie.test(data$LogCreditAmount[data$Property==item]))
-  hist(data$LogCreditAmount[data$Property==item], main = paste("Histogram of log credit amount with property" , item), xlab = 'Log credit amount')
+  print(lillie.test(data$LogCreditAmount[data$Property == item]))
+  hist(data$LogCreditAmount[data$Property == item], main = paste("", item), xlab = 'log(CreditAmount)')
 }
+
 ```
-Bartlettovim testom testiramo homogenost varijanci kod razlicitih populacija. Postavljamo ipoteze:
+
+
+Bartlettovim testom testiramo homogenost varijanci kod razlicitih populacija. Postavljamo i poteze:
 $$ \begin{aligned}
   H_0 & : \sigma_1^2 = \sigma_2^2 = \ldots = \sigma_k^2 \\
   H_1 & : \text{barem dvije varijance nisu iste}.
 \end{aligned} $$
+
+
 ```{r}
 bartlett_result <- bartlett.test(data$LogCreditAmount ~ data$Property)
 print(bartlett_result)
 ```
-Vidimo da su pretpostavke o normalnosti i pretpostavka o homogenosti valjane ako pogledamo pvrijednosti testova. (Sta je s ovom jednom vecom p vrijednosti kod KS testa???)
+
+Vidimo da su pretpostavke o normalnosti i pretpostavka o homogenosti valjane ako pogledamo pvrijednosti testova. 
 Provedimo sada ANOVA test kako bi testirali našu osnovnu pretpostavku. Postavljamo hipoteze:
+
 $$ \begin{aligned}
   H_0 & : \mu_1 = \mu_2 = \ldots = \mu_k \\
   H_1 & : \text{barem dvije sredine nisu iste}.
 \end{aligned} $$
+
+
 ```{r}
 a = aov(data$LogCreditAmount ~ data$Property)
 summary(a)
 
-boxplot(data$LogCreditAmount ~ data$Property, main = "Boxplot of log credit amount by property", xlab = "Property", ylab = "Log credit amount")
-
+boxplot(data$LogCreditAmount ~ data$Property, 
+        main = "Boxplot logaritmiranog iznosa kredita prema vrsti imovine", 
+        xlab = "Property", 
+        ylab = "log(CreditAmount)", 
+        cex.axis = 0.7, 
+)
 plot(a)
 ```
 
@@ -369,24 +393,20 @@ coef_table <- data.frame(
 
 significant_vars <- coef_table[coef_table$`Pr(>|z|)` < 0.05, ]
 
-# Display the table of significant variables
 print(significant_vars)
 
-#Cross-validation
 set.seed(123)  
 
 formula <- Default ~ AccountStatus + Duration + CreditHistory + Purpose + CreditAmount + Account + EmploymentSince + PercentOfIncome + Gender + MaritalStatus + OtherDebtors + ResidenceSince + Property + Age + OtherInstallPlans + Housing + NumExistingCredits + Job + NumberOfDependents + Telephone + ForeignWorker
 
-# Kontrola unakrsne provjere
 ctrl <- trainControl(method = "cv", number = 10)
 
-# Fitiranje logističkog regresijskog modela s unakrsnom promjenom
 cv_model <- train(formula, data = data, method = "glm", family = binomial(), trControl = ctrl)
 
-# Prikaz rezultata unakrsne promjenom
 print(cv_model)
-
 ```
 
 ### **6. Zaključak**
+
+
 
