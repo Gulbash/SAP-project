@@ -3,8 +3,8 @@ title: "Statistička analiza podataka - projekt"
 author: "AMMP"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 editor_options:
   markdown:
     wrap: 72
@@ -252,34 +252,43 @@ Nakon obavljene analize testirajmo sada statističkim testom možemo li temeljem
 ```{r}
 require(caret)
 
-logreg.mdl = glm(Default ~ AccountStatus + Duration + CreditHistory + Purpose + CreditAmount + Account + EmploymentSince + PercentOfIncome + Gender + MaritalStatus + OtherDebtors + ResidenceSince + Property + Age + OtherInstallPlans + Housing + NumExistingCredits + Job + NumberOfDependents + Telephone + ForeignWorker, data = data, family = binomial())
-summary(logreg.mdl)
-odds_ratios <- exp(coef(logreg.mdl))
-print(odds_ratios)
+logreg.mdl <- glm(Default ~ AccountStatus + Duration + CreditHistory + Purpose + CreditAmount + Account + EmploymentSince + PercentOfIncome + Gender + MaritalStatus + OtherDebtors + ResidenceSince + Property + Age + OtherInstallPlans + Housing + NumExistingCredits + Job + NumberOfDependents + Telephone + ForeignWorker, data = data, family = binomial())
 
-Rsq = 1 - logreg.mdl$deviance/logreg.mdl$null.deviance
-Rsq
+Rsq <- 1 - logreg.mdl$deviance/logreg.mdl$null.deviance
+
+coef_summary <- summary(logreg.mdl)$coefficients
 
 coef_table <- data.frame(
-  Variable = names(coef(logreg.mdl)),
-  Coefficient = coef(logreg.mdl),
-  OddsRatio = exp(coef(logreg.mdl))
+  Variable = rownames(coef_summary),
+  Coefficient = coef_summary[, "Estimate"],
+  OddsRatio = exp(coef_summary[, "Estimate"]),
+  `Pr(>|z|)` = coef_summary[, "Pr(>|z|)"],
+  stringsAsFactors = FALSE
 )
-
 significant_vars <- coef_table[coef_table$`Pr(>|z|)` < 0.05, ]
 
+cat("R-squared:", Rsq, "\n")
+cat("Significant variables:", paste(significant_vars$Variable, collapse = ", "), "\n")
 print(significant_vars)
+```
 
-set.seed(123)  
+Nema značajnih varijabli za p-vrijednost 0.05 što ukazuje da nijedna od varijabli nije statistički relevantna za predviđanje ciljne varijable. Logistička regeresija se u ovom slučaju nije pokazala kao dobar model. Također, obzirom na nisku vrijednost R-kvadrata ukazano nam je da model nije dovoljno dobar u objašnjavanju varijance za varijablu "Default". 
+
+```{r}
+set.seed(123)
 
 formula <- Default ~ AccountStatus + Duration + CreditHistory + Purpose + CreditAmount + Account + EmploymentSince + PercentOfIncome + Gender + MaritalStatus + OtherDebtors + ResidenceSince + Property + Age + OtherInstallPlans + Housing + NumExistingCredits + Job + NumberOfDependents + Telephone + ForeignWorker
 
 ctrl <- trainControl(method = "cv", number = 10)
 
-cv_model <- train(formula, data = data, method = "glm", family = binomial(), trControl = ctrl)
+cv_model <- suppressWarnings(train(formula, data = data, method = "glm", family = binomial(), trControl = ctrl))
 
 print(cv_model)
 ```
+
+Cross-validated generaliziranog linearnog modela na 1000 uzoraka točno je generalizirao 75.4% uzoraka što ukazuje na (samo) vrlo dobre performanse modela. Stupanj suglasnosti (kappa) između  stvarnih i predviđenih klasa jest 0.38. Želimo da je ta vrijednost bliže 1 te zaključujemo da rezultat nije idealan. 
+
+Ovaj model, kako je opisan, pokazuje određenu prediktivnu sposobnost, ali nedostatak značajnih varijabli i umjereni kappa vrijednost sugeriraju da ima prostora za poboljšanja. Trebali bi smo uvažiti mogućnosti daljnjeg istraživanja, selekciju varijabli, podešavanje modela ili istraživanje različitih algoritama.
 
 ### **4. Jesu li muškarci skloniji nesipunjavanja obaveza po kreditu od žena?**
 
@@ -387,5 +396,5 @@ Na temelju p-vrijednosti zaključujemo kako na razini značajnosti od 5% možemo
 
 ### **6. Zaključak**
 
-
-
+Ukupni zaključak cijelog rada je podijeljen. Puno smo vremena proveli u razmatranju pravog pristupa zadacima. Problem nam je predstavljala "realnost" podataka jer smo naviknuti na prilagođene podatke, podatke koji ne odstupaju, prema kojima lakše pretpostavljamo homogenost, normalnost... Ovdje to nije jednostavno, podatke treba filtrirati iprilagošavati za zadovoljavanje uvjeta testova. Iz tog su razloga testovi i njihovi zaključci ograničeni i treba ih uzeti sa zadrškom.
+Mnogo smo naučili iz ovog projekta i to će nam iskustvo zasigurno biti od pomoći ako se i kada budemo susretali s problemima ove vrste.
