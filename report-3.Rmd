@@ -41,7 +41,7 @@ Najprije učitamo podatke. Od iznimne je važnosti ispravno proučavanje istih, 
 data = read.csv('procjena_kreditnog_rizika.csv')
 ```
 
-Radi reglednosti čistimo i uljepšavamo podatke:
+Radi preglednosti čistimo i uljepšavamo podatke:
 
 ```{r}
 data$Default <- as.logical(data$Default)
