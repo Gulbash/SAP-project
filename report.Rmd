@@ -252,7 +252,12 @@ Nakon obavljene analize testirajmo sada statističkim testom možemo li temeljem
 ```{r}
 require(caret)
 
-logreg.mdl <- glm(Default ~ AccountStatus + Duration + CreditHistory + Purpose + CreditAmount + Account + EmploymentSince + PercentOfIncome + Gender + MaritalStatus + OtherDebtors + ResidenceSince + Property + Age + OtherInstallPlans + Housing + NumExistingCredits + Job + NumberOfDependents + Telephone + ForeignWorker, data = data, family = binomial())
+logreg.mdl <- glm(Default ~ AccountStatus + Duration + CreditHistory +
+  Purpose + CreditAmount + Account + EmploymentSince + PercentOfIncome +
+  Gender + MaritalStatus + OtherDebtors + ResidenceSince + Property +
+  Age + OtherInstallPlans + Housing + NumExistingCredits + Job +
+  NumberOfDependents + Telephone + ForeignWorker, data = data,
+  family = binomial())
 
 Rsq <- 1 - logreg.mdl$deviance/logreg.mdl$null.deviance
 
@@ -277,7 +282,11 @@ Nema značajnih varijabli za p-vrijednost 0.05 što ukazuje da nijedna od varija
 ```{r}
 set.seed(123)
 
-formula <- Default ~ AccountStatus + Duration + CreditHistory + Purpose + CreditAmount + Account + EmploymentSince + PercentOfIncome + Gender + MaritalStatus + OtherDebtors + ResidenceSince + Property + Age + OtherInstallPlans + Housing + NumExistingCredits + Job + NumberOfDependents + Telephone + ForeignWorker
+formula <- Default ~ AccountStatus + Duration + CreditHistory + Purpose +
+  CreditAmount + Account + EmploymentSince + PercentOfIncome + Gender +
+  MaritalStatus + OtherDebtors + ResidenceSince + Property + Age +
+  OtherInstallPlans + Housing + NumExistingCredits + Job +
+  NumberOfDependents + Telephone + ForeignWorker
 
 ctrl <- trainControl(method = "cv", number = 10)
 
