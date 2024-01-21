@@ -209,9 +209,9 @@ Gledajući distribuciju varijable "Duration", možemo zaključiti da je većina 
 
 
 ```{r}
-hist(CreditAmount, col = 'lightgreen', ylim = c(0, 500), main = 'Histogram varijable "Duration"')
+hist(CreditAmount, col = 'lightgreen', ylim = c(0, 500), main = 'Histogram varijable "CreditAmount"')
 
-boxplot(CreditAmount, col = 'lightgreen', main = 'Boxplot varijable "Duration"')
+boxplot(CreditAmount, col = 'lightgreen', main = 'Boxplot varijable "CreditAmount"')
 abline(h = seq(0, 20000, by = 2000), col = "gray", lty = 2)
 
 ```
