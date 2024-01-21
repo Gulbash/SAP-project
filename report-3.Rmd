@@ -325,10 +325,12 @@ Testirajmo sada postoji li razlika u traženom iznosu kredita prema imovini klij
 
 Histogrami iznosa kredita obzirom na vrstu imovine: 
 ```{r}
+par(mfrow = c(2, 2))
+
 for (item in unique(data$Property)) {
   hist(data$CreditAmount[data$Property==item], main = paste("", item), xlab = "CreditAmount")
 }
-
+par(mfrow = c(1, 1))
 ```
 
 Vidimo kako pretpostavka o normalnosti nema smisla. No, probajmo sada logaritmirati podatke pa provesti Lillieforsovu inačicu KS testa.
@@ -344,7 +346,6 @@ for (item in unique(data$Property)) {
   print(lillie.test(data$LogCreditAmount[data$Property == item]))
   hist(data$LogCreditAmount[data$Property == item], main = paste("", item), xlab = 'log(CreditAmount)')
 }
-
 ```
 
 
