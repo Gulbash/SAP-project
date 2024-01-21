@@ -18,6 +18,7 @@ library(dplyr)
 
 #### Studenti: Marita Radić, Antun Tišljar, Petar Knežević i Mislav Rendulić
 
+
 **Asistent: Andro Merćep**
 
 **Cilj** ovoga projekta je uzeti dane podatke i iz njih probati izvući
